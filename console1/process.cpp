@@ -101,6 +101,19 @@ int MyPrintSolution(glp_prob* lp, char* solution_file)
 
 	glp_create_index(lp);
 
+	int stat = glp_get_prim_stat(lp);
+	switch (stat)
+	{
+	case GLP_UNDEF: out << "primal solution is undefined" << endl;
+					break;
+	case GLP_FEAS: out << "primal solution is feasible" << endl;
+					break;
+	case GLP_INFEAS: out << "primal solution is infeasible" << endl;
+					break;
+	case GLP_NOFEAS: out << "no primal feasible solution exists" << endl;
+					break;
+	}
+
 	out << "LP solution" << endl;
 	PrintSolArray(lp,"x",out);
 	PrintSolArray(lp,"y",out);
