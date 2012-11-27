@@ -1,6 +1,7 @@
 #include "process.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 using namespace std;
 
 struct MyException {};
@@ -34,7 +35,7 @@ int ProcessProblem(char* model_file, char* data_file, char* solution_file)
 		}
 		glp_mpl_build_prob(tran, mip);
 		glp_simplex(mip, NULL);
-		//glp_intopt(mip, NULL);
+		glp_intopt(mip, NULL);
 		ret = glp_mpl_postsolve(tran, mip, GLP_MIP);
 		if (ret != 0)
 		{
@@ -57,8 +58,38 @@ int ProcessProblem(char* model_file, char* data_file, char* solution_file)
 	glp_mpl_free_wksp(tran);
 	glp_delete_prob(mip);
 
-	glp_mpl_
 	return 0;
+}
+
+char* GenerateColName(char* buff, char* name, int i, int j)
+{
+	sprintf(buff, "%s[%d,%d]",name,i,j);
+	return buff;
+}
+
+inline void PrintSolArray(glp_prob* lp,  char* name, ostream &out, bool integer=false)
+{
+	out << name << endl;
+	char buff[256];
+	int i=1;
+	int j=1;
+	int col_num=glp_find_col(lp,GenerateColName(buff, name, i, j));
+	while( col_num )
+	{
+		if (!integer)
+			out << glp_get_col_prim(lp,col_num) << ";";
+		else
+			out << glp_mip_col_val(lp,col_num) << ";";
+		j++;
+		col_num=glp_find_col(lp,GenerateColName(buff, name, i, j));
+		if (!col_num)
+		{
+			out << endl;
+			i++;
+			j=1;
+			col_num=glp_find_col(lp,GenerateColName(buff, name, i, j));
+		}
+	}
 }
 
 int MyPrintSolution(glp_prob* lp, char* solution_file)
@@ -67,10 +98,19 @@ int MyPrintSolution(glp_prob* lp, char* solution_file)
 	ofstream out(solution_file);
 	if (!out)
 		return 1;
-	for(int i=1; i<=n; i++)
-	{
-		out << glp_get_col_name(lp,i) << " = " << glp_get_col_prim(lp,i) << endl;
-	}
+
+	glp_create_index(lp);
+
+	out << "LP solution" << endl;
+	PrintSolArray(lp,"x",out);
+	PrintSolArray(lp,"y",out);
+
+	out << "MIP solution" << endl;
+	PrintSolArray(lp,"x",out,true);
+	PrintSolArray(lp,"y",out,true);
+
+	glp_delete_index(lp);
+
 	return 0;
 	out.close();
 }

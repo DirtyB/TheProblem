@@ -1,0 +1,8 @@
+data;
+
+param n:=2;
+param p:=3;
+param r:=[1] 0 [2] 4 ;
+param w:=[1] 2 [2] 9 ;
+
+end;

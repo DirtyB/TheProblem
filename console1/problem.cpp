@@ -12,7 +12,7 @@ bool CMyProblem::InBounds(int index) const
 
 CMyProblem::CMyProblem(int _n, int _p)
 {
-	r=0;
+	n=0;
 	if ((_n<1)||(_p<1))
 		return;
 
@@ -157,12 +157,12 @@ void CMyProblem::WriteMathProg(const char* filename)
 
 	out << "param r:=";
 	for (int i=0; i<n; i++)
-		out << "[" << i << "] " << r[i] << " ";
+		out << "[" << i+1 << "] " << r[i] << " ";
 	out << ";" << endl;
 
 	out << "param w:=";
 	for (int i=0; i<n; i++)
-		out << "[" << i << "] " << w[i] << " ";
+		out << "[" << i+1 << "] " << w[i] << " ";
 	out<< ";" << endl;
 
 	out << "" << endl;
