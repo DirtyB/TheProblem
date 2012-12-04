@@ -180,10 +180,6 @@
 				RelativePath=".\problem.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\process.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -192,10 +188,6 @@
 			>
 			<File
 				RelativePath=".\problem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\process.h"
 				>
 			</File>
 		</Filter>

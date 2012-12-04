@@ -1,6 +1,7 @@
+#include <ios>
 #include <iostream>
 #include "problem.h"
-#include "process.h"
+//#include "process.h"
 
 using namespace std;
 
@@ -64,50 +65,62 @@ void main(int argc, char* argv[])
 	char * filename2 = new char[256];
 	char * prob_name = new char[256];
 	CMyProblem P(0,0);
+	istream* in;
+	ifstream fin;
 	if (argc<2)
 	{
 		cout << "Problem name: ";
 		cin >> prob_name;
-		P = ReadProblemFromStream(cin);
+		fin.open(prob_name);
+		if (!fin)
+			in=&cin;
+		else
+			in=&fin;
 	}
 	else
 	{
-		ifstream in(argv[1]);
-		if (!in)
-		{
-			cout << argv[1] << " not found" << endl;
-			return;
-		}
-		try
-		{
-			P = ReadProblemFromStream(in);
-		}
-		catch(WrongFileException)
-		{
-			cout << "Wrong file format" << endl;
-		}
 		strcpy(prob_name,argv[1]);
+		fin.open(prob_name);
+		if (!fin)
+		{
+			cout << prob_name << " not found" << endl;
+			return;	
+		}
+		in=&fin;
 	}
 
-	strcpy(filename,prob_name);
-	strcpy(filename+strlen(filename),".dat");
-	P.WriteMathProg(filename);
+	try
+	{
+		P = ReadProblemFromStream(*in);
+	}
+	catch(WrongFileException)
+	{
+		cout << "Wrong file format" << endl;
+		return;
+	}
+	
+	P.Set_name(prob_name);
 
 	strcpy(filename2,prob_name);
 	strcpy(filename2+strlen(filename2),".csv");
 
-	ProcessProblem("m2_int.mod",filename,filename2);
+	ofstream out(filename2);
+	//тут можно чего-нибудь пописать
+	out << prob_name << endl;
+	out.close();
 
-	/*char * filename = new char[256];
-	while(1)
-	{
-		cout << "Name: ";
-		cin >> filename;
-		if (strcmp(filename,"exit")==0)
-			break;
-		strcpy(filename+strlen(filename),".dat");
-		CMyProblem P = ReadProblemFromKeyboard();
-		P.WriteMathProg(filename);
-	}
-	delete []filename;*/
+	int res;
+	res = P.ConstructLP("m2_int.mod");
+	if (res!=0)
+		return;
+	P.SolveLP();
+	out.open(filename2,ios_base::app);
+	P.PrintLPSolution(out);
+	out.close();
+	P.SolveMIP();
+	out.open(filename2,ios_base::app);
+	P.PrintMIPSolution(out);
+	out.close();
+	
+	
 }
