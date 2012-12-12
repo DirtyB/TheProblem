@@ -1,6 +1,9 @@
 #include <ios>
 #include <iostream>
 #include "problem.h"
+#include <stdlib.h>
+#include <time.h>
+#include <glpk.h>
 //#include "process.h"
 
 using namespace std;
@@ -59,8 +62,26 @@ CMyProblem ReadProblemFromStream(istream &in)
 }
 
 
+int Random(int min, int max)
+{
+	return min + (rand() % (int)(max - min + 1));
+}
+
+void ChangeObjective(glp_prob* lp)
+{
+	int nn = glp_get_num_cols(lp);
+	for (int i=1;i<=nn;i++)
+	{
+		int ccc=Random(0,100);
+		//cout << glp_get_col_name(lp,i) << " " << ccc << endl;
+		glp_set_obj_coef(lp,i,ccc);
+	}
+}
+
+
 void main(int argc, char* argv[])
 {
+	srand ( time(NULL) );
 	char * filename = new char[256];
 	char * filename2 = new char[256];
 	char * prob_name = new char[256];
@@ -110,17 +131,38 @@ void main(int argc, char* argv[])
 	out.close();
 
 	int res;
+
+
 	res = P.ConstructLP("m2_int.mod");
 	if (res!=0)
 		return;
+
+	ChangeObjective(P.GetProblem());
+
 	P.SolveLP();
 	out.open(filename2,ios_base::app);
 	P.PrintLPSolution(out);
 	out.close();
-	P.SolveMIP();
+
+
+	for(int i=0; i<15; i++)
+	{
+		res = P.ConstructLP("m2_int.mod");
+		if (res!=0)
+			return;
+
+		ChangeObjective(P.GetProblem());
+
+		P.SolveLP();
+		out.open(filename2,ios_base::app);
+		P.PrintLPSolution(out);
+		out.close();
+	}
+
+	/*P.SolveMIP();
 	out.open(filename2,ios_base::app);
 	P.PrintMIPSolution(out);
-	out.close();
+	out.close();*/
 	
 	
 }
