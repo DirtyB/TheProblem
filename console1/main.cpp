@@ -6,6 +6,7 @@
 #include <glpk.h>
 //#include "process.h"
 
+
 using namespace std;
 
 struct WrongFileException{};
@@ -137,8 +138,6 @@ void main(int argc, char* argv[])
 	if (res!=0)
 		return;
 
-	ChangeObjective(P.GetProblem());
-
 	P.SolveLP();
 	out.open(filename2,ios_base::app);
 	P.PrintLPSolution(out);
@@ -152,6 +151,22 @@ void main(int argc, char* argv[])
 			return;
 
 		ChangeObjective(P.GetProblem());
+		glp_set_obj_dir(P.GetProblem(),GLP_MIN);
+
+		P.SolveLP();
+		out.open(filename2,ios_base::app);
+		P.PrintLPSolution(out);
+		out.close();
+	}
+
+	for(int i=0; i<15; i++)
+	{
+		res = P.ConstructLP("m2_int.mod");
+		if (res!=0)
+			return;
+
+		ChangeObjective(P.GetProblem());
+		glp_set_obj_dir(P.GetProblem(),GLP_MAX);
 
 		P.SolveLP();
 		out.open(filename2,ios_base::app);

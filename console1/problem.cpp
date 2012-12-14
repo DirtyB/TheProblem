@@ -1,4 +1,5 @@
 #include "problem.h"
+#include <cmath>
 
 struct MyException {};
 
@@ -258,19 +259,36 @@ inline char* GenerateColName(char* buff, char* name, int i, int j)
 	return buff;
 }
 
+inline bool IsNotBinary(double x)
+{
+	return abs(abs(x-0.5)-0.5)>AVAIL_ERROR;
+}
+
 inline void PrintSolArray(glp_prob* lp,  char* name, ostream &out, bool integer=false)
 {
 	out << name << endl;
 	char buff[256];
 	int i=1;
 	int j=1;
+	double value;
 	int col_num=glp_find_col(lp,GenerateColName(buff, name, i, j));
 	while( col_num )
 	{
 		if (!integer)
-			out << glp_get_col_prim(lp,col_num) << ";";
+		{
+			value = glp_get_col_prim(lp,col_num);
+
+			//проверка иксов на целочисленность
+			if ((strcmp(name,"x")==0)&&(IsNotBinary(value)))
+			{
+				out<<"!!! ";
+			}
+		}
 		else
-			out << glp_mip_col_val(lp,col_num) << ";";
+		{
+			value = glp_mip_col_val(lp,col_num);
+		}
+		out << value << ";";
 		j++;
 		col_num=glp_find_col(lp,GenerateColName(buff, name, i, j));
 		if (!col_num)

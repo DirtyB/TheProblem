@@ -7,6 +7,9 @@
 #include <glpk.h>
 using namespace std;
 
+#define AVAIL_ERROR 1.0e-12;
+
+
 class CMyProblem 
 {
 public:
