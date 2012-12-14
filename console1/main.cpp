@@ -68,14 +68,23 @@ int Random(int min, int max)
 	return min + (rand() % (int)(max - min + 1));
 }
 
-void ChangeObjective(glp_prob* lp)
+void ChangeObjective(glp_prob* lp, bool bx=true, bool by=true)
 {
 	int nn = glp_get_num_cols(lp);
 	for (int i=1;i<=nn;i++)
 	{
-		int ccc=Random(0,100);
 		//cout << glp_get_col_name(lp,i) << " " << ccc << endl;
-		glp_set_obj_coef(lp,i,ccc);
+		const char* name = glp_get_col_name(lp,i);
+		if (((name[0]=='x')&&bx)||((name[0]=='y')&&by))
+		{
+			int ccc=Random(0,100);
+			glp_set_obj_coef(lp,i,ccc);
+		}
+		else
+		{
+			glp_set_obj_coef(lp,i,0);
+		}
+		//cout << name << " = " << glp_get_obj_coef(lp,i) << endl;
 	}
 }
 
@@ -150,7 +159,7 @@ void main(int argc, char* argv[])
 		if (res!=0)
 			return;
 
-		ChangeObjective(P.GetProblem());
+		ChangeObjective(P.GetProblem(),(i<10),(i>=5));
 		glp_set_obj_dir(P.GetProblem(),GLP_MIN);
 
 		P.SolveLP();
@@ -165,7 +174,7 @@ void main(int argc, char* argv[])
 		if (res!=0)
 			return;
 
-		ChangeObjective(P.GetProblem());
+		ChangeObjective(P.GetProblem(),(i<10),(i>=5));
 		glp_set_obj_dir(P.GetProblem(),GLP_MAX);
 
 		P.SolveLP();

@@ -289,6 +289,10 @@ inline void PrintSolArray(glp_prob* lp,  char* name, ostream &out, bool integer=
 			value = glp_mip_col_val(lp,col_num);
 		}
 		out << value << ";";
+
+		//допишем коэффициенты ещё
+		out << "*(" << glp_get_obj_coef(lp,col_num) << ");";
+
 		j++;
 		col_num=glp_find_col(lp,GenerateColName(buff, name, i, j));
 		if (!col_num)
@@ -305,6 +309,8 @@ int CMyProblem::PrintLPSolution(ostream &out)
 {
 	glp_create_index(lp);
 	out << "LP solution" << endl;
+	out << "Dir;" << ((glp_get_obj_dir(lp)==GLP_MIN) ? "min" : "max") << endl;
+	out << "f;" << glp_get_obj_val(lp) << endl; 
 	PrintSolArray(lp,"x",out);
 	PrintSolArray(lp,"y",out);
 	glp_delete_index(lp);
