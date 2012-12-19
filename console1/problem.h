@@ -7,7 +7,7 @@
 #include <glpk.h>
 using namespace std;
 
-#define AVAIL_ERROR 1.0e-12;
+#define AVAIL_ERROR 1.0e-12
 
 
 class CMyProblem 
@@ -40,6 +40,8 @@ public:
 	int SolveMIP();
 	int PrintLPSolution(ostream &out);
 	int PrintMIPSolution(ostream &out);
+
+	double RealResult();
 
 	glp_prob* GetProblem() { return lp; };
 

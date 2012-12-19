@@ -291,7 +291,7 @@ inline void PrintSolArray(glp_prob* lp,  char* name, ostream &out, bool integer=
 		out << value << ";";
 
 		//допишем коэффициенты ещё
-		out << "*(" << glp_get_obj_coef(lp,col_num) << ");";
+		//out << "*(" << glp_get_obj_coef(lp,col_num) << ");";
 
 		j++;
 		col_num=glp_find_col(lp,GenerateColName(buff, name, i, j));
@@ -305,12 +305,57 @@ inline void PrintSolArray(glp_prob* lp,  char* name, ostream &out, bool integer=
 	}
 }
 
+double CMyProblem::RealResult()
+{
+	char buff[256];
+	int i=1;
+	int j=1;
+	double value;
+	int add;
+	int result=0;
+	int col_num=glp_find_col(lp,GenerateColName(buff, "x", i, j));
+	while( col_num )
+	{
+		value = glp_get_col_prim(lp,col_num);
+		if ( abs(1.0-value)<AVAIL_ERROR )
+		{
+			add=j*w[i-1];
+		}
+
+		j++;
+		col_num=glp_find_col(lp,GenerateColName(buff, "x", i, j));
+		if (!col_num)
+		{
+			result+=add;
+			i++;
+			j=1;
+			col_num=glp_find_col(lp,GenerateColName(buff, "x", i, j));
+		}
+	}
+	return result;
+}
+
+char* DecodeStatus(int status)
+{
+	switch (status){
+		case GLP_OPT: return "solution is optimal";
+		case GLP_FEAS: return "solution is feasible (but may not be optimal)";
+		case GLP_INFEAS: return "solution is infeasible";
+		case GLP_NOFEAS: return "problem has no feasible solution";
+		case GLP_UNBND: return "problem has unbounded solution";
+		case GLP_UNDEF: return "solution is undefined";
+	}
+	return "unknown status";
+}
+
+
 int CMyProblem::PrintLPSolution(ostream &out)
 {
 	glp_create_index(lp);
 	out << "LP solution" << endl;
 	out << "Dir;" << ((glp_get_obj_dir(lp)==GLP_MIN) ? "min" : "max") << endl;
-	out << "f;" << glp_get_obj_val(lp) << endl; 
+	out << "f; " << glp_get_obj_val(lp) << ";/*" << RealResult() << "*/" << endl; 
+	out << "Status;" << DecodeStatus(glp_get_status(lp)) << endl;
 	PrintSolArray(lp,"x",out);
 	PrintSolArray(lp,"y",out);
 	glp_delete_index(lp);
@@ -321,6 +366,9 @@ int CMyProblem::PrintMIPSolution(ostream &out)
 {
 	glp_create_index(lp);
 	out << "MIP solution" << endl;
+	out << "Dir;" << ((glp_get_obj_dir(lp)==GLP_MIN) ? "min" : "max") << endl;
+	out << "f;" << glp_mip_obj_val(lp) << endl; 
+	out << "Status;" << DecodeStatus(glp_mip_status(lp)) << endl;
 	PrintSolArray(lp,"x",out,true);
 	PrintSolArray(lp,"y",out,true);
 	glp_delete_index(lp);

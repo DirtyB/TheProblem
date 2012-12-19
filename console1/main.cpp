@@ -152,7 +152,7 @@ void main(int argc, char* argv[])
 	P.PrintLPSolution(out);
 	out.close();
 
-
+/*
 	for(int i=0; i<15; i++)
 	{
 		res = P.ConstructLP("m2_int.mod");
@@ -181,12 +181,12 @@ void main(int argc, char* argv[])
 		out.open(filename2,ios_base::app);
 		P.PrintLPSolution(out);
 		out.close();
-	}
+	}*/
 
-	/*P.SolveMIP();
+	P.SolveMIP();
 	out.open(filename2,ios_base::app);
 	P.PrintMIPSolution(out);
-	out.close();*/
+	out.close();
 	
 	
 }
