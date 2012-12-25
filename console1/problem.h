@@ -47,6 +47,8 @@ public:
 
 	void WriteTXT(const char* filename);
 	void WriteMathProg(const char* filename);
+
+	void ReadFromDB(int idproblem);
 	
 	CMyProblem& operator= (const CMyProblem &src);
 

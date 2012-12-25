@@ -96,6 +96,13 @@ void main(int argc, char* argv[])
 	char * filename2 = new char[256];
 	char * prob_name = new char[256];
 	CMyProblem P(0,0);
+
+	P.ReadFromDB(1);
+
+	return;
+
+
+
 	istream* in;
 	ifstream fin;
 	if (argc<2)

@@ -133,7 +133,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glpk_4_47.lib"
+				AdditionalDependencies="glpk_4_47.lib mysqlcppconn.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
