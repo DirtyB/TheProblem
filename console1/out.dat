@@ -1,8 +1,0 @@
-data;
-
-param n:=1;
-param p:=3;
-param r:=[0] 4 ;
-param w:=[0] 5 ;
-
-end;

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <glpk.h>
-//#include "process.h"
+#include "dbroutines.h"
 
 
 using namespace std;
@@ -97,10 +97,49 @@ void main(int argc, char* argv[])
 	char * prob_name = new char[256];
 	CMyProblem P(0,0);
 
-	P.ReadFromDB(1);
+	P.ReadFromDB(1525);
 
+	//cout << "written as" << P.WriteToDB() << endl;
+
+	//P.WriteMathProg("1.txt");
+
+	DBWorker wrkr;
+
+	ofstream out("test.csv");
+	wrkr.PrintResultToStream(out,814,false);
 	return;
 
+	/*wrkr.RunBatch(17,"m2_int.mod",true);
+	wrkr.RunBatch(17,"m2_u1.mod",true);
+	wrkr.RunBatch(17,"m2_u2.mod",true);*/
+
+	/*cout << wrkr.GenerateDefaultObjective(1) << endl;
+	cout << wrkr.GenerateDefaultObjective(2) << endl;*/
+
+	//wrkr.DoRun(wrkr.GenerateDefaultObjective(2),"m2_int.mod",true);
+
+	/*int batch = wrkr.GenerateBathch("test batch");
+
+	wrkr.RunBatch(batch,"m2_int.mod",true);
+
+	return;*/
+
+	//P.WriteTXT(P.Get_name().c_str());
+	/*P.SortByR();
+	strcpy(filename2,P.Get_name().c_str());
+	strcpy(filename2+strlen(filename2),"_sorted");	
+	P.WriteTXT(filename2);*/
+
+	/*vector<CMyProblem> subprob;
+	P.Decomposite(subprob);
+	for(int i=0;i<subprob.size();i++)
+	{
+		cout << subprob[i].Get_name() << endl;
+		subprob[i].WriteTXT(subprob[i].Get_name().c_str());
+	}
+	
+	//тут пока закончим
+	return;*/
 
 
 	istream* in;
@@ -139,18 +178,20 @@ void main(int argc, char* argv[])
 	
 	P.Set_name(prob_name);
 
+
 	strcpy(filename2,prob_name);
 	strcpy(filename2+strlen(filename2),".csv");
 
-	ofstream out(filename2);
+	out.open(filename2);
 	//тут можно чего-нибудь пописать
 	out << prob_name << endl;
 	out.close();
 
+
+
 	int res;
 
-
-	res = P.ConstructLP("m2_int.mod");
+	res = P.ConstructLP("m2_uuu.mod");
 	if (res!=0)
 		return;
 

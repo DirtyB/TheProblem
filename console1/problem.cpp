@@ -1,5 +1,6 @@
 #include "problem.h"
 #include <cmath>
+#include <time.h>
 
 #include "mysql_connection.h"
 #include <cppconn/driver.h>
@@ -7,6 +8,8 @@
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 #include <cppconn/prepared_statement.h>
+
+#define MAXSTACK 2048 // максимальный размер стека
 
 struct MyException {};
 
@@ -37,7 +40,7 @@ CMyProblem::CMyProblem(int _n, int _p)
 
 	_alloc(_n);
 
-	p=_p;
+	Set_p(_p);
 };
 
 CMyProblem::CMyProblem(const CMyProblem &src)
@@ -76,29 +79,21 @@ void CMyProblem::_alloc( int _n)
 	n=_n;
 	r.resize(n,0);
 	w.resize(n,0);
+	original_index.resize(n,0);
+	for(int i=0;i<n;i++)
+		original_index[i]=i;
+
 	lp = glp_create_prob();
-	/*try{
-		r=new int[n];
-		w=new double[n];
-		for (int i=0; i<n; i++)
-		{
-			r[i]=0;
-			w[i]=0;
-		}
-	}
-	catch(bad_alloc){
-		if (r!=0)
-			delete[]r;
-		n=0;
-	}*/
 }
 
 void CMyProblem::_copy(const CMyProblem &src) 
 {
+	name = src.name;	
 	n=src.n;
 	p=src.p;
 	r=src.r;
 	w=src.w;
+	original_index=src.original_index;
 	glp_copy_prob(lp,src.lp,GLP_ON);
 	/*for (int i=0;i<n;i++)
 	{
@@ -127,6 +122,8 @@ void CMyProblem::Set_r(int index, int value)
 	else
 		r[index]=value;
 }
+
+
 
 void CMyProblem::Set_w(int index, double value)
 {
@@ -388,7 +385,6 @@ void CMyProblem::ReadFromDB(int idproblem)
 		sql::Driver *driver;
 		sql::Connection *con;
 		sql::PreparedStatement *ProblemStmt;
-		sql::PreparedStatement *ParamsStmt;
 		sql::ResultSet *res;
 		/* Create a connection */
 		driver = get_driver_instance();
@@ -396,7 +392,40 @@ void CMyProblem::ReadFromDB(int idproblem)
 		/* Connect to the MySQL test database */
 		con->setSchema("theproblem");
 		
-		cout<< "Connected succesfully";
+		//cout<< "Connected succesfully";
+
+		ProblemStmt = con->prepareStatement("SELECT name, n, p FROM problems WHERE idproblems=?");
+		ProblemStmt->setInt(1, idproblem);
+		res = ProblemStmt->executeQuery();
+		delete ProblemStmt;
+		
+		//cout<< "Statment executed succesfully";
+
+		res->next();
+		name = res->getString("name");
+		n = res->getInt("n");
+		p = res->getInt("p");
+		delete res;
+
+		//cout << name << n << p;
+
+		_alloc(n);
+
+		ProblemStmt = con->prepareStatement(
+			"SELECT i, r, w FROM parameters WHERE idproblems=?"
+			);
+		ProblemStmt->setInt(1, idproblem);
+		res = ProblemStmt->executeQuery();
+		int i; //int r; double w;
+		while(res->next())
+		{
+			i = res->getInt("i");
+			Set_r(i-1,res->getInt("r"));
+			Set_w(i-1,res->getDouble("w"));
+			//cout << res->getInt("i") << " " << res->getInt("r") << " " << res->getDouble("w") << endl;
+		}
+		delete res;
+		delete ProblemStmt;
 
 		delete con;
 	}
@@ -409,4 +438,226 @@ void CMyProblem::ReadFromDB(int idproblem)
 		cout << ", SQLState: " << e.getSQLState() << 
 			" )" << endl;
 	}
+}
+
+
+int CMyProblem::WriteToDB()
+{
+	int idproblems;
+	try {
+		sql::Driver *driver;
+		sql::Connection *con;
+		sql::PreparedStatement *PrepStmt;
+		sql::ResultSet *res;
+		/* Create a connection */
+		driver = get_driver_instance();
+		con = driver->connect("tcp://localhost:3306", "root", "TestPassword");
+		/* Connect to the MySQL test database */
+		con->setSchema("theproblem");
+		
+		PrepStmt = con->prepareStatement(
+			"INSERT INTO  problems(name, n, p) values (?,?,?)"
+			);
+		PrepStmt->setString(1, name);
+		PrepStmt->setInt(2, n);
+		PrepStmt->setInt(3, p);
+		PrepStmt->execute();
+		delete PrepStmt;
+		
+		PrepStmt = con->prepareStatement(
+			"SELECT LAST_INSERT_ID()"
+			);
+		res = PrepStmt->executeQuery();
+		delete PrepStmt;
+		res->next();
+		idproblems = res->getInt(1);
+		delete res;
+
+		PrepStmt = con->prepareStatement(
+			"INSERT INTO parameters(idproblems, i, r, w) values (?,?,?,?)"
+			);
+		PrepStmt->setInt(1, idproblems);
+		for (int i=0; i<n; i++)
+		{
+			PrepStmt->setInt(2, i+1);
+			PrepStmt->setInt(3, r[i]);
+			PrepStmt->setDouble(4, w[i]);
+			PrepStmt->execute();
+		}
+		delete PrepStmt;
+
+		delete con;
+	}
+	catch (sql::SQLException &e) {
+		cout << "# ERR: SQLException in " << __FILE__;
+		cout << "(" << __FUNCTION__ << ") on line " 
+			<< __LINE__ << endl;
+		cout << "# ERR: " << e.what();
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << 
+			" )" << endl;
+	}
+	return idproblems;
+}
+
+int myRandom(int min, int max)
+{
+	return min + (rand() % (int)(max - min + 1));
+}
+
+void CMyProblem::GenerateRandomProblem(int _n, int _p, string _name, int max_r, int max_w)
+{
+
+	_alloc(_n);
+	Set_p(_p);
+	Set_name(_name.c_str());
+	for (int i=0; i<n; i++)
+	{
+		r[i]=myRandom(0,(max_r!=0)?max_r:p*n+1);
+		w[i]=myRandom(1,(max_w!=0)?max_w:100);
+		//cout << r[i] << ' ' << w[i]<< endl;
+	}
+	//cout << endl;
+}
+
+void CMyProblem::Set_orig_index(int index, int value)
+{
+	/*if (!InBounds(index))
+		return;
+	if (value<0)
+		original_index[index]=0;
+	else*/
+		original_index[index]=value;
+}
+
+int CMyProblem::Get_orig_index(int index) const
+{
+	/*if (!InBounds(index))
+		return 0;*/
+	return original_index[index];
+}	
+
+inline void CMyProblem::_swap(int i1, int i2)
+{
+	int temp_r=r[i1];
+	double temp_w=w[i1];
+	int temp_orig_index = original_index[i1];
+
+	r[i1]=r[i2];
+	w[i1]=w[i2];
+	original_index[i1]=original_index[i2];
+
+	r[i2]=temp_r;
+	w[i2]=temp_w;
+	original_index[i2]=temp_orig_index;
+}
+
+
+void CMyProblem::SortByR() //сортируем в порядке возрастания r[i]. Быстрая сортировка
+{
+	long i, j; // указатели, участвующие в разделении
+	long lb, ub; // границы сортируемого в цикле фрагмента
+	 
+	long lbstack[MAXSTACK], ubstack[MAXSTACK]; // стек запросов
+	// каждый запрос задается парой значений,
+	// а именно: левой(lbstack) и правой(ubstack)
+	// границами промежутка
+	long stackpos = 1; // текущая позиция стека
+	long ppos; // середина массива
+	int pivot; // опорный элемент
+	//T temp;
+	 
+	lbstack[1] = 0;
+	ubstack[1] = n-1;
+	 
+	do {
+		// Взять границы lb и ub текущего массива из стека.
+		lb = lbstack[ stackpos ];
+		ub = ubstack[ stackpos ];
+		stackpos--;
+		 
+		do {
+			// Шаг 1. Разделение по элементу pivot
+			ppos = ( lb + ub ) >> 1;
+			i = lb; j = ub; pivot = r[ppos];
+			do {
+				while ( r[i] < pivot ) i++;
+				while ( pivot < r[j] ) j--;
+				if ( i <= j ) {
+					//temp = a[i]; r[i] = a[j]; a[j] = temp;
+					_swap(i,j);
+					i++; j--;
+				}
+			} while ( i <= j );
+	 
+			// Сейчас указатель i указывает на начало правого подмассива,
+			// j - на конец левого (см. иллюстрацию выше), lb ? j ? i ? ub.
+			// Возможен случай, когда указатель i или j выходит за границу массива
+			 
+			// Шаги 2, 3. Отправляем большую часть в стек и двигаем lb,ub
+			if ( i < ppos ) { // правая часть больше
+				if ( i < ub ) { // если в ней больше 1 элемента - нужно
+					stackpos++; // сортировать, запрос в стек
+					lbstack[ stackpos ] = i;
+					ubstack[ stackpos ] = ub;
+				}
+				ub = j; // следующая итерация разделения
+				// будет работать с левой частью
+				} else { // левая часть больше
+					if ( j > lb ) {
+					stackpos++;
+					lbstack[ stackpos ] = lb;
+					ubstack[ stackpos ] = j;
+				}
+				lb = i;
+			}
+		} while ( lb < ub ); // пока в меньшей части более 1 элемента
+	} while ( stackpos != 0 ); // пока есть запросы в стеке
+}
+
+CMyProblem CMyProblem::_subproblem(int first_row, int rows, int offset, int part)
+{
+	CMyProblem SP(rows,p);
+	char new_name[256];//опасность!!
+	//cout << name << " " << part << endl;
+	sprintf(new_name,"%s_%d",name.c_str(),part);
+	//cout << new_name << endl;
+	SP.Set_name(new_name);
+	//cout << SP.Get_name()<< endl;
+	for(int i=0; i<rows; i++)
+	{
+		SP.Set_r(i,r[first_row+i]-offset);
+		SP.Set_w(i,w[first_row+i]);
+		SP.Set_orig_index(i,original_index[first_row+i]);
+	}
+	return SP;
+}
+
+int CMyProblem::Decomposite(vector<CMyProblem>& subproblems)
+{
+	SortByR();
+	int offset=0;
+	int rows=0;
+	subproblems.clear();
+	for(int i=0;i<n;i++)
+	{
+		if (r[i]-offset < rows*p)
+		{
+			rows++;
+		}
+		else
+		{
+			if (rows>0)
+			{
+				cout << i-rows << " " << rows << " " << offset << " " << subproblems.size() << endl;
+				subproblems.push_back(_subproblem(i-rows,rows,offset,subproblems.size()));
+				cout << subproblems[subproblems.size()-1].Get_name() << endl;
+			}
+			offset=r[i];
+			rows=1;
+		}
+	}
+	cout<< n-rows << " " << rows << " " << offset << " " << subproblems.size() << endl;
+	subproblems.push_back(_subproblem(n-rows,rows,offset,subproblems.size()));
+	return subproblems.size();
 }

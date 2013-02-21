@@ -1,0 +1,12 @@
+Name:;;3_5_1
+n:;;3
+p:;;5
+Model file:;;m2_u1.mod
+Run type:;;lp
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.00469254
+Objective value:;;210
+r;w;;x
+0;3;;
+5;6;;
+10;9;;
