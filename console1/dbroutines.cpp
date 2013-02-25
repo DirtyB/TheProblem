@@ -329,7 +329,6 @@ void DBWorker::PrintResultToStream(ostream& out, int idrun, bool mip)
 {
 	try{
 		sql::PreparedStatement *PrepStmt;
-		sql::PreparedStatement *RowStmt;
 		sql::ResultSet *res;
 
 		PrepStmt = con->prepareStatement(
@@ -373,7 +372,6 @@ void DBWorker::PrintResultToStream(ostream& out, int idrun, bool mip)
 
 		out << "r;w;;x" << endl;
 		int l_i=0;
-		int l_j=0;
 		for(int i=1; i<=n; i++)
 		{
 			while (l_i<i)
@@ -390,9 +388,18 @@ void DBWorker::PrintResultToStream(ostream& out, int idrun, bool mip)
 			{
 				out << ";;;";
 			}
-
+			_PrintRow(out,idrun,mip,i,"x");
 			out << endl;
 		}
+		out << ";;;y" << endl;
+		for(int i=1; i<=n; i++)
+		{
+			out << ";;;";
+			_PrintRow(out,idrun,mip,i,"y");
+			out << endl;
+		}
+
+		delete res;
 	
 	}
 	catch (sql::SQLException &e) {
@@ -400,21 +407,65 @@ void DBWorker::PrintResultToStream(ostream& out, int idrun, bool mip)
 	}
 }
 
-void _PrintRow(ostream& out, int idrun, bool mip, int i, char* var_name)
+void DBWorker::_PrintRow(ostream& out, int idrun, bool mip, int i, char* var_name)
 {
 	try{
 		sql::PreparedStatement *PrepStmt;
 		sql::ResultSet *res;
 
 		PrepStmt = con->prepareStatement(
-			"select j, value from  results res where res.idrun = ?  and res.runtype=?  and i = ? and var_name = ? order by i;"
+			"select max(j) from  results res where res.idrun = ?  and res.runtype=?  and i = ? and var_name = ? ;"
 			);
-		PrepStmt->setInt(1,idbatches);
+		PrepStmt->setInt(1,idrun);
+		if (mip)
+			PrepStmt->setString(2,"mip");
+		else
+			PrepStmt->setString(2,"lp");
+		PrepStmt->setInt(3,i);
+		PrepStmt->setString(4,var_name);
+		res = PrepStmt->executeQuery();
+		delete PrepStmt;
+
+		res->next();
+		int d=res->getInt(1);
+		delete res;
+
+		PrepStmt = con->prepareStatement(
+			"select j, value, idrun, runtype, i, var_name from  results res where res.idrun = ?  and res.runtype=?  and i = ? and var_name = ? order by j;"
+			);
+		PrepStmt->setInt(1,idrun);
+		if (mip)
+			PrepStmt->setString(2,"mip");
+		else
+			PrepStmt->setString(2,"lp");
+		PrepStmt->setInt(3,i);
+		PrepStmt->setString(4,var_name);
 		res = PrepStmt->executeQuery();
 		delete PrepStmt;
 		
-		while(res->next())
+		int l_j=0;
+		for(int j=1; j<=d; j++)
 		{
+			while (l_j<j)
+			{
+				if (!res->next())
+					l_j=d+1;
+				l_j = res->getInt(1);
+			}
+			if (l_j==j)
+			{
+				out << /*res->getInt(1) << " " <<
+					res->getInt(3) << " " <<
+					res->getString(4) << " " <<
+					res->getInt(5) << " " <<
+					res->getString(6) << " " <<*/
+					res->getDouble(2) << ";";
+			}
+			else
+			{
+				out << ";";
+			}
+
 		}
 		delete res;	
 	
@@ -423,4 +474,62 @@ void _PrintRow(ostream& out, int idrun, bool mip, int i, char* var_name)
 		SQLError(e);
 	}
 }
+
+void DBWorker::PrintResultsToStreamByObjective(ostream& out, int idobjective)
+{
+	try{
+		sql::PreparedStatement *PrepStmt;
+		sql::ResultSet *res;
+
+
+		PrepStmt = con->prepareStatement(
+			"SELECT idruns, runtype FROM theproblem.runs where idobjectives=? order by runtype desc, idruns;"
+			);
+		PrepStmt->setInt(1,idobjective);
+		res = PrepStmt->executeQuery();
+		delete PrepStmt;
+		
+		while(res->next())
+		{
+			PrintResultToStream(out,res->getInt(1), strcmp(res->getString(2).c_str(),"mip"));
+			out << endl;
+		}
+
+		delete res;	
+	
+	}
+	catch (sql::SQLException &e) {
+		SQLError(e);
+	}
+}
+
+void DBWorker::PrintResultsByBatch(int idbatches)
+{
+	try{
+		sql::PreparedStatement *PrepStmt;
+		sql::ResultSet *res;
+
+
+		PrepStmt = con->prepareStatement(
+			"SELECT batch_elem.idobjectives, CONCAT(CONCAT_WS('-',CONCAT('b',idbatches),bat_order,name),'.csv') filename FROM batch_elem, objectives, problems where batch_elem.idobjectives=objectives.idobjectives and objectives.idproblems=problems.idproblems and batch_elem.idbatches=? order by bat_order;"
+			);
+		PrepStmt->setInt(1,idbatches);
+		res = PrepStmt->executeQuery();
+		delete PrepStmt;
+		
+		ofstream out;
+		while(res->next())
+		{
+			out.open(res->getString(2).c_str());
+			if (out)
+				PrintResultsToStreamByObjective(out,res->getInt(1));
+			out.close();
+		}
+
+		delete res;	
+	
+	}
+	catch (sql::SQLException &e) {
+		SQLError(e);
+	}
 }

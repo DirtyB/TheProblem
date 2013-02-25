@@ -1,0 +1,90 @@
+Name:;;2_2_1
+n:;;2
+p:;;2
+Model file:;;m2_int.mod
+Run type:;;lp
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.0123607
+Objective value:;;25.5
+r;w;;x
+0;3;;1;1;0;0;0;0;
+2;6;;0;0;1;1;0;0;
+;;;y
+;;;0.5;0;0;0;0;
+;;;1;1;0.5;0;0;
+
+Name:;;2_2_1
+n:;;2
+p:;;2
+Model file:;;m2_u1.mod
+Run type:;;lp
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.0046194
+Objective value:;;30
+r;w;;x
+0;3;;1;1;0;0;
+2;6;;0;0;1;1;
+;;;y
+;;;1;0;0;
+;;;1;1;1;
+
+Name:;;2_2_1
+n:;;2
+p:;;2
+Model file:;;m2_u2.mod
+Run type:;;lp
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.00494035
+Objective value:;;30
+r;w;;x
+0;3;;1;1;0;0;
+2;6;;0;0;1;1;
+;;;y
+;;;1;0;0;
+;;;1;1;1;
+
+Name:;;2_2_1
+n:;;2
+p:;;2
+Model file:;;m2_int.mod
+Run type:;;mip
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.0375663
+Objective value:;;30
+r;w;;x
+0;3;;1;1;0;0;0;0;
+2;6;;0;0;1;1;0;0;
+;;;y
+;;;1;0;0;0;0;
+;;;1;1;1;0;0;
+
+Name:;;2_2_1
+n:;;2
+p:;;2
+Model file:;;m2_u1.mod
+Run type:;;mip
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.00593641
+Objective value:;;30
+r;w;;x
+0;3;;1;1;0;0;
+2;6;;0;0;1;1;
+;;;y
+;;;1;0;0;
+;;;1;1;1;
+
+Name:;;2_2_1
+n:;;2
+p:;;2
+Model file:;;m2_u2.mod
+Run type:;;mip
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.0058599
+Objective value:;;30
+r;w;;x
+0;3;;1;1;0;0;
+2;6;;0;0;1;1;
+;;;y
+;;;1;0;0;
+;;;1;1;1;
+

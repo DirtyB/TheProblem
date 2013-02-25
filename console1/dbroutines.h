@@ -33,6 +33,9 @@ public:
 	void RunBatch(int idbatches, char* modelfile, bool mip=false);
 
 	void PrintResultToStream(ostream& out, int idrun, bool mip=false);
+	void PrintResultsToStreamByObjective(ostream& out, int idobjective);
+	void PrintResultsByBatch(int idbatches);
+
 
 protected:
 	sql::Driver *driver;

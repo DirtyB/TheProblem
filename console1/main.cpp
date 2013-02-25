@@ -105,9 +105,14 @@ void main(int argc, char* argv[])
 
 	DBWorker wrkr;
 
-	ofstream out("test.csv");
-	wrkr.PrintResultToStream(out,814,false);
+	//	ofstream out("test.csv");
+	//wrkr.PrintResultToStream(out,814,false);
+	//wrkr.PrintResultsToStreamByObjective(out,2214);
+	//out.close();
+	wrkr.PrintResultsByBatch(17);
 	return;
+
+	ofstream out;
 
 	/*wrkr.RunBatch(17,"m2_int.mod",true);
 	wrkr.RunBatch(17,"m2_u1.mod",true);
