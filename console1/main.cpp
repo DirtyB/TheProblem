@@ -109,14 +109,16 @@ void main(int argc, char* argv[])
 	//wrkr.PrintResultToStream(out,814,false);
 	//wrkr.PrintResultsToStreamByObjective(out,2214);
 	//out.close();
-	wrkr.PrintResultsByBatch(17);
-	return;
+
 
 	ofstream out;
 
-	/*wrkr.RunBatch(17,"m2_int.mod",true);
-	wrkr.RunBatch(17,"m2_u1.mod",true);
-	wrkr.RunBatch(17,"m2_u2.mod",true);*/
+	/*wrkr.RunBatch(18,"m2_int.mod",true);
+	wrkr.RunBatch(18,"m2_u1.mod",true);
+	wrkr.RunBatch(18,"m2_u2.mod",true);*/
+
+	wrkr.PrintResultsByBatch(18);
+	return;
 
 	/*cout << wrkr.GenerateDefaultObjective(1) << endl;
 	cout << wrkr.GenerateDefaultObjective(2) << endl;*/
@@ -182,6 +184,11 @@ void main(int argc, char* argv[])
 	}
 	
 	P.Set_name(prob_name);
+
+	int idprob = P.WriteToDB();
+	int idobj = wrkr.GenerateDefaultObjective(idprob);
+	cout << idobj << endl;
+	return;
 
 
 	strcpy(filename2,prob_name);
