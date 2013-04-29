@@ -1,0 +1,1 @@
+glpsol -m %1 -d %2  --wlp %2.lp --check

@@ -52,6 +52,23 @@ r;w;;x
 Name:;;3_5_2
 n:;;3
 p:;;5
+Model file:;;m2_step2.mod
+Run type:;;lp
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.00808935
+Objective value:;;150
+r;w;;x
+0;5;;1;1;1;1;1;-9.86076e-032;-3.57453e-032;-4.93038e-032;0;-1.97215e-031;0;0;0;0;0;
+4;5;;0;0;0;0;-6.77927e-032;1;1;1;1;1;4.44089e-017;0;0;0;0;
+9;5;;0;0;0;0;0;0;0;0;0;2.22045e-016;1;1;1;1;1;
+;;;y
+;;;1;1;1;1;-7.39557e-032;-5.54668e-032;-4.93038e-032;-3.69779e-032;0;0;0;0;0;0;
+;;;1;1;1;1;1;1;1;1;1;8.88178e-018;0;0;0;0;
+;;;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+
+Name:;;3_5_2
+n:;;3
+p:;;5
 Model file:;;m2_int.mod
 Run type:;;mip
 Sotution status:;;solution is optimal
@@ -90,6 +107,23 @@ Model file:;;m2_u2.mod
 Run type:;;mip
 Sotution status:;;solution is optimal
 Time (in seconds):;;0.0105159
+Objective value:;;150
+r;w;;x
+0;5;;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;
+4;5;;0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;
+9;5;;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;
+;;;y
+;;;1;1;1;1;0;0;0;0;0;0;0;0;0;0;
+;;;1;1;1;1;1;1;1;1;1;0;0;0;0;0;
+;;;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+
+Name:;;3_5_2
+n:;;3
+p:;;5
+Model file:;;m2_step2.mod
+Run type:;;mip
+Sotution status:;;solution is optimal
+Time (in seconds):;;0.0237965
 Objective value:;;150
 r;w;;x
 0;5;;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;

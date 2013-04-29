@@ -254,7 +254,12 @@ int CMyProblem::SolveLP()
 
 int CMyProblem::SolveMIP()
 {
-	return glp_intopt(lp, NULL);	
+	//инициализация параметров MIP-решателя
+	glp_iocp params;
+	glp_init_iocp(&params);
+	params.presolve=GLP_ON;
+	params.tm_lim=360000;
+	return glp_intopt(lp, &params);	
 }
 
 inline char* GenerateColName(char* buff, char* name, int i, int j)
@@ -514,6 +519,21 @@ void CMyProblem::GenerateRandomProblem(int _n, int _p, string _name, int max_r, 
 	for (int i=0; i<n; i++)
 	{
 		r[i]=myRandom(0,(max_r!=0)?max_r:p*n+1);
+		w[i]=myRandom(1,(max_w!=0)?max_w:100);
+		//cout << r[i] << ' ' << w[i]<< endl;
+	}
+	//cout << endl;
+}
+
+void CMyProblem::GenerateRandomProblemWNC(int _n, int _p, string _name,  int max_w)
+{
+
+	_alloc(_n);
+	Set_p(_p);
+	Set_name(_name.c_str());
+	for (int i=0; i<n; i++)
+	{
+		r[i]=myRandom(0, p*i);
 		w[i]=myRandom(1,(max_w!=0)?max_w:100);
 		//cout << r[i] << ' ' << w[i]<< endl;
 	}

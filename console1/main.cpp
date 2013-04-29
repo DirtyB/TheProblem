@@ -97,7 +97,7 @@ void main(int argc, char* argv[])
 	char * prob_name = new char[256];
 	CMyProblem P(0,0);
 
-	P.ReadFromDB(1525);
+	//P.ReadFromDB(1525);
 
 	//cout << "written as" << P.WriteToDB() << endl;
 
@@ -117,19 +117,41 @@ void main(int argc, char* argv[])
 	wrkr.RunBatch(18,"m2_u1.mod",true);
 	wrkr.RunBatch(18,"m2_u2.mod",true);*/
 
-	wrkr.PrintResultsByBatch(18);
-	return;
+	/*wrkr.PrintResultsByBatch(17);
+	return;*/
 
 	/*cout << wrkr.GenerateDefaultObjective(1) << endl;
 	cout << wrkr.GenerateDefaultObjective(2) << endl;*/
 
 	//wrkr.DoRun(wrkr.GenerateDefaultObjective(2),"m2_int.mod",true);
 
-	/*int batch = wrkr.GenerateBathch("test batch");
+	/*int batch = wrkr.GenerateBathch("test batch 21-30");
+	cout <<batch;*/
 
-	wrkr.RunBatch(batch,"m2_int.mod",true);
+	/*wrkr.RunBatch(21,"m2_step1.mod",true);
+	wrkr.RunBatch(21,"m2_start.mod",true);*/
 
-	return;*/
+	vector<string> models;
+	//models.push_back(string("m2_step1.mod"));
+	//models.push_back(string("m2_start.mod"));
+	//models.push_back(string("m1_int.mod"));
+	models.push_back(string("m2_step2.mod"));
+	wrkr.RunBatchOnMultipeModels(24,models,true);
+
+	//cout << "Batch number: " << batch << endl;
+
+
+	/*wrkr.DoRun(2565,"m2_int.mod",true);
+	wrkr.DoRun(2565,"m2_u1.mod",true);
+	wrkr.DoRun(2565,"m2_u2.mod",true);
+	wrkr.DoRun(2565,"m2_start.mod",true);
+	wrkr.DoRun(2565,"m2_step1.mod",true);
+
+	out.open("obj.csv");
+	wrkr.PrintResultsToStreamByObjective(out,2565);
+	out.close();*/
+
+	return;
 
 	//P.WriteTXT(P.Get_name().c_str());
 	/*P.SortByR();

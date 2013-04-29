@@ -26,11 +26,12 @@ public:
 
 	int GenerateDefaultObjective(int idproblems);
 
-	int DoRun(int idobjectives, char* modelfile, bool mip=false);
+	int DoRun(int idobjectives, const char* modelfile, bool mip=false);
 
 	int GenerateBathch(char* batch_name);
 
 	void RunBatch(int idbatches, char* modelfile, bool mip=false);
+	void RunBatchOnMultipeModels(int idbatches, vector<string> modelfiles, bool mip);
 
 	void PrintResultToStream(ostream& out, int idrun, bool mip=false);
 	void PrintResultsToStreamByObjective(ostream& out, int idobjective);
@@ -44,7 +45,7 @@ protected:
 	void _Connect();
 	void _Disconnect();
 
-	int _RememberRun(CMyProblem &P, int idobjectives, char* modelfile, double time, bool mip=false, int idruns=0);
+	int _RememberRun(CMyProblem &P, int idobjectives, const char* modelfile, double time, bool mip=false, int idruns=0);
 
 	void _PrintRow(ostream& out, int idrun, bool mip, int i, char* var_name);
 

@@ -110,7 +110,7 @@ int DBWorker::GenerateDefaultObjective(int idproblem)
 	}
 }
 
-int DBWorker::DoRun(int idobjectives, char* modelfile, bool mip)
+int DBWorker::DoRun(int idobjectives, const  char* modelfile, bool mip)
 {
 	int idruns;
 	try{
@@ -160,7 +160,7 @@ int DBWorker::DoRun(int idobjectives, char* modelfile, bool mip)
 	return idruns;
 }
 
-int DBWorker::_RememberRun(CMyProblem &P, int idobjectives, char* modelfile, double time, bool mip, int idruns)
+int DBWorker::_RememberRun(CMyProblem &P, int idobjectives, const char* modelfile, double time, bool mip, int idruns)
 {
 	int idrun = -1;
 	try{
@@ -274,13 +274,14 @@ int DBWorker::GenerateBathch(char* batch_name)
 
 		int i=1;
 		CMyProblem P(0,0);
-		for(int n=2; n<=15; n++)
+		for(int n=21; n<=30; n++)
 		{	
-			while (i<=n*10)
+			while (i<=(n-20)*6)
 			{
 				char buff[256];
 				sprintf(buff, "b%d-%d_%d",idbatches,n,i);
-				P.GenerateRandomProblem(n,3,buff);
+				//P.GenerateRandomProblem(n,3,buff);
+				P.GenerateRandomProblemWNC(n,3+((n-20)*6-i-1)/3,buff);
 				int idproblems = P.WriteToDB();
 				int idobjectives = GenerateDefaultObjective(idproblems);
 				PrepStmt->setInt(2,i);
@@ -316,6 +317,36 @@ void DBWorker::RunBatch(int idbatches, char* modelfile, bool mip){
 		{
 			idobjective = res->getInt(2);
 			DoRun(idobjective,modelfile,mip);
+		}
+		delete res;	
+	
+	}
+	catch (sql::SQLException &e) {
+		SQLError(e);
+	}
+}
+
+void DBWorker::RunBatchOnMultipeModels(int idbatches, vector<string> modelfiles, bool mip)
+{
+	try{
+		sql::PreparedStatement *PrepStmt;
+		sql::ResultSet *res;
+
+		PrepStmt = con->prepareStatement(
+			"select bat_order, idobjectives from batch_elem where idbatches=? order by bat_order"
+			);
+		PrepStmt->setInt(1,idbatches);
+		res = PrepStmt->executeQuery();
+		delete PrepStmt;
+		
+		int idobjective;
+		while(res->next())
+		{
+			idobjective = res->getInt(2);
+			for (vector<string>::iterator it = modelfiles.begin() ; it != modelfiles.end(); ++it)
+			{
+				DoRun(idobjective,it->c_str(),mip);
+			}
 		}
 		delete res;	
 	

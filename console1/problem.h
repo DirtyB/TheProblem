@@ -52,6 +52,7 @@ public:
 	int WriteToDB();
 
 	void GenerateRandomProblem(int n, int p, string name, int max_r=0, int max_w=0);
+	void GenerateRandomProblemWNC(int n, int p, string name, int max_w=0); //без пустых столбцов в расписании
 
 	void SortByR();
 
